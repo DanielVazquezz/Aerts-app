@@ -1,3 +1,3 @@
-# Aerts-app
+# Aeris-app
 
 [Edit in StackBlitz next generation editor ⚡️](https://stackblitz.com/~/github.com/DanielVazquezz/Aerts-app)
