@@ -2,6 +2,28 @@ import React from "react";
 import { useState, useEffect, useRef, useCallback } from "react";
 
 /* ═══ FIREBASE ═══ */
+
+// Auto-configure viewport for mobile (runs once)
+(function setupViewport() {
+  if (typeof document === "undefined") return;
+  // Set viewport meta
+  let vp = document.querySelector('meta[name="viewport"]');
+  if (!vp) { vp = document.createElement("meta"); vp.name = "viewport"; document.head.appendChild(vp); }
+  vp.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover";
+  // Apple web app meta
+  const addMeta = (name, content) => { if (!document.querySelector(`meta[name="${name}"]`)) { const m = document.createElement("meta"); m.name = name; m.content = content; document.head.appendChild(m); } };
+  addMeta("apple-mobile-web-app-capable", "yes");
+  addMeta("apple-mobile-web-app-status-bar-style", "default");
+  addMeta("theme-color", "#faf9f7");
+  // Prevent bounce/overscroll
+  document.documentElement.style.cssText = "height:100%;width:100%;overflow:hidden;position:fixed;top:0;left:0;right:0;bottom:0";
+  document.body.style.cssText = "height:100%;width:100%;overflow:hidden;position:fixed;top:0;left:0;right:0;bottom:0;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent";
+  const root = document.getElementById("root");
+  if (root) root.style.cssText = "height:100%;width:100%;overflow:hidden";
+  // Set title
+  document.title = "Aeris";
+})();
+
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDdlYYn-oNkn-kswsd087gXgBBCobWCtx4",
   authDomain: "notes-app-7bc31.firebaseapp.com",
@@ -1156,7 +1178,7 @@ function NotesApp({ user, fb, isDesktop, isStandalone, onSignOut }) {
               onPickFolder={nid => setPickingNote(nid)}
               searchQ={searchQ}
             />
-            <div className="fab" style={{ ...s.fab, background: C.fabBg, color: C.fabC, borderRadius: T.fabRadius }} onClick={createNote}><PlusI /></div>
+            <div className={`fab ${fullScreen ? "safe-fab" : ""}`} style={{ ...s.fab, background: C.fabBg, color: C.fabC, borderRadius: T.fabRadius }} onClick={createNote}><PlusI /></div>
           </div>
         )}
 
@@ -1202,7 +1224,7 @@ function NotesApp({ user, fb, isDesktop, isStandalone, onSignOut }) {
             </div>
 
             {/* ── Bottom toolbar ── */}
-            <div style={{ ...s.toolbar, background: dk ? "rgba(44,44,46,.95)" : (T.cardStyle === "glass" ? "rgba(255,255,255,.92)" : T.cardStyle === "paper" ? "#fef9f0" : T.phoneBg), borderTop: `1px ${T.cardStyle === "paper" ? "dashed rgba(160,140,110,.2)" : "solid"} ${T.cardStyle === "paper" ? "" : C.divider}`, backdropFilter: T.cardStyle === "glass" ? "blur(20px)" : "none" }}>
+            <div className={fullScreen ? "safe-b" : ""} style={{ ...s.toolbar, background: dk ? "rgba(44,44,46,.95)" : (T.cardStyle === "glass" ? "rgba(255,255,255,.92)" : T.cardStyle === "paper" ? "#fef9f0" : T.phoneBg), borderTop: `1px ${T.cardStyle === "paper" ? "dashed rgba(160,140,110,.2)" : "solid"} ${T.cardStyle === "paper" ? "" : C.divider}`, backdropFilter: T.cardStyle === "glass" ? "blur(20px)" : "none" }}>
               <div className="tbb" style={{ ...s.tbb, color: C.text }} onMouseDown={e => { e.preventDefault(); doFormat("underline"); }} title="Underline"><UnderlineI /><span style={{ ...s.tbLbl, fontSize: T.id === "diary" ? 12 : 9 }}>Underline</span></div>
               <div className="tbb" style={{ ...s.tbb, color: "#e8a449" }} onMouseDown={e => { e.preventDefault(); doFormat("highlight"); }} title="Highlight"><HighlightI /><span style={{ ...s.tbLbl, fontSize: T.id === "diary" ? 12 : 9 }}>Highlight</span></div>
               <div className="tbb" style={{ ...s.tbb, color: T.id === "diary" ? "#7a6a5a" : "#34c759" }} onClick={addTodoBlock} title="To-Do"><TodoI /><span style={{ ...s.tbLbl, fontSize: T.id === "diary" ? 12 : 9 }}>To-Do</span></div>
@@ -1291,9 +1313,7 @@ const buildCSS = (dk, theme) => `
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&display=swap');
 .paper-lines{background-image:repeating-linear-gradient(transparent,transparent 31px,rgba(160,140,110,.13) 31px,rgba(160,140,110,.13) 32px);background-position:0 0}
 .paper-margin{border-left:2px solid rgba(220,100,100,.12);margin-left:0;padding-left:14px}
-*{box-sizing:border-box;margin:0;padding:0}::-webkit-scrollbar{width:0;height:0}
-html,body,#root{height:100%;width:100%;overflow:hidden;position:fixed;top:0;left:0}
-body{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent;touch-action:manipulation;overscroll-behavior:none}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}::-webkit-scrollbar{width:0;height:0}
 @keyframes fu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 @keyframes si{from{opacity:0;transform:translateX(50px)}to{opacity:1;transform:translateX(0)}}
 @keyframes so{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(50px)}}
@@ -1309,6 +1329,7 @@ body{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent;touch
 .cd{transition:all .2s cubic-bezier(.23,1,.32,1);cursor:pointer}.cd:hover{transform:scale(1.25)}
 .ch{transition:all .2s ease;cursor:pointer}.ch:hover{transform:scale(1.04)}.ch:active{transform:scale(.96)}
 .fab{transition:all .25s cubic-bezier(.23,1,.32,1)}.fab:hover{transform:scale(1.08);box-shadow:0 8px 32px rgba(0,0,0,.25)}.fab:active{transform:scale(.94)}
+@supports(padding:env(safe-area-inset-bottom)){.safe-b{padding-bottom:env(safe-area-inset-bottom)}.safe-fab{bottom:calc(32px + env(safe-area-inset-bottom)) !important}}
 .sr{transition:all .2s ease;cursor:pointer}.sr:hover{background:${dk?"rgba(255,255,255,.06)":"rgba(0,0,0,.04)"} !important}.sr:active{transform:scale(.98)}
 .tog{cursor:pointer;transition:background .3s ease}
 .thm{transition:all .2s ease;cursor:pointer}.thm:hover{transform:scale(1.05)}
