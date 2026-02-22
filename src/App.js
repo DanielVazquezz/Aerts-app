@@ -543,18 +543,18 @@ function SwipeCard({ note, idx, folders, onClick, showF, dk, onDelete, onAssignF
                      theme.cardStyle === "paper" ? (dk ? "none" : "1px 2px 0 rgba(140,120,90,.06)") : "none";
   const cardBlur = theme.cardStyle === "glass" ? "blur(20px)" : "none";
   return (
-    <div style={{ position: "relative", marginBottom: 10, borderRadius: cr, overflow: "hidden", animation: "fu .5s cubic-bezier(.23,1,.32,1) both", animationDelay: `${idx * .05}s`, opacity: removing ? 0 : 1, maxHeight: removing ? 0 : 300, transition: removing ? "opacity .3s ease,max-height .35s ease .05s" : "none" }}>
+    <div style={{ position: "relative", marginBottom: 14, borderRadius: cr, overflow: "hidden", animation: "fu .5s cubic-bezier(.23,1,.32,1) both", animationDelay: `${idx * .05}s`, opacity: removing ? 0 : 1, maxHeight: removing ? 0 : 300, transition: removing ? "opacity .3s ease,max-height .35s ease .05s" : "none" }}>
       <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg,#34c759,#30b350)", borderRadius: cr, display: "flex", alignItems: "center", paddingLeft: 20, opacity: rR > 10 ? 1 : 0, transition: "opacity .15s" }}><div style={{ display: "flex", alignItems: "center", gap: 8, color: "#fff" }}><FolderSvg /><span style={{ fontSize: 14, fontWeight: 650, fontFamily: theme.uiFont }}>Move to…</span></div></div>
       <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg,#ff3b30,#e0322b)", borderRadius: cr, display: "flex", alignItems: "center", justifyContent: "flex-end", paddingRight: 20, opacity: lR > 10 ? 1 : 0, transition: "opacity .15s" }}><div style={{ display: "flex", alignItems: "center", gap: 8, color: "#fff", transform: `scale(${.8 + dp * .4})` }}><span style={{ fontSize: 14, fontWeight: 650, fontFamily: theme.uiFont }}>{dp > .7 ? "Release" : "Delete"}</span><TrashSvg /></div></div>
-      <div onTouchStart={e => hStart(e.touches[0].clientX, e.touches[0].clientY)} onTouchMove={e => hMove(e.touches[0].clientX, e.touches[0].clientY)} onTouchEnd={hEnd} onMouseDown={e => { e.preventDefault(); hStart(e.clientX, e.clientY); }} onClick={hClick} style={{ position: "relative", zIndex: 2, padding: "15px 18px", borderRadius: cr, background: cardBg, border: cardBorder, boxShadow: cardShadow, backdropFilter: cardBlur, WebkitBackdropFilter: cardBlur, transform: `translateX(${offX}px)`, transition: dragging ? "none" : "transform .4s cubic-bezier(.23,1,.32,1)", cursor: "grab", userSelect: "none" }}>
+      <div onTouchStart={e => hStart(e.touches[0].clientX, e.touches[0].clientY)} onTouchMove={e => hMove(e.touches[0].clientX, e.touches[0].clientY)} onTouchEnd={hEnd} onMouseDown={e => { e.preventDefault(); hStart(e.clientX, e.clientY); }} onClick={hClick} style={{ position: "relative", zIndex: 2, padding: "18px 20px", borderRadius: cr, background: cardBg, border: cardBorder, boxShadow: cardShadow, backdropFilter: cardBlur, WebkitBackdropFilter: cardBlur, transform: `translateX(${offX}px)`, transition: dragging ? "none" : "transform .4s cubic-bezier(.23,1,.32,1)", cursor: "grab", userSelect: "none" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
-          <h3 style={{ fontSize: theme.id === "diary" ? 21 : 17, fontWeight: theme.headWeight, lineHeight: 1.25, letterSpacing: theme.headSpacing, flex: 1, color: dk ? "#f5f5f7" : (theme.cardStyle === "solid" || theme.cardStyle === "paper" ? theme.accentColor : p.accent), fontFamily: theme.headFont }}>{note.title || "Untitled"}</h3>
+          <h3 style={{ fontSize: theme.id === "diary" ? 23 : 19, fontWeight: theme.headWeight, lineHeight: 1.25, letterSpacing: theme.headSpacing, flex: 1, color: dk ? "#f5f5f7" : (theme.cardStyle === "solid" || theme.cardStyle === "paper" ? theme.accentColor : p.accent), fontFamily: theme.headFont }}>{note.title || "Untitled"}</h3>
           {note.pinned && <span style={{ color: dk ? "#f5f5f7" : p.accent, opacity: .5 }}><PinI filled /></span>}
         </div>
-        <p style={{ fontSize: theme.id === "diary" ? 17 : 14, color: dk ? "rgba(255,255,255,.35)" : (theme.id === "diary" ? "rgba(90,74,58,.5)" : "rgba(0,0,0,.4)"), lineHeight: 1.45, marginTop: 4, fontFamily: theme.bodyFont }}>{excerpt(note.blocks)}</p>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 8 }}>
-          <span style={{ fontSize: theme.id === "diary" ? 14 : 12, color: dk ? "rgba(255,255,255,.2)" : (theme.id === "diary" ? "rgba(90,74,58,.3)" : "rgba(0,0,0,.25)"), fontWeight: 500, fontFamily: theme.uiFont }}>{fmtDate(note.date)}</span>
-          {f && <div style={{ display: "flex", alignItems: "center", gap: 5, padding: "2px 8px 2px 6px", borderRadius: cr / 2, background: dk ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.03)" }}><div style={{ width: 6, height: 6, borderRadius: 3, background: f.color }} /><span style={{ color: f.color, fontSize: 11, fontWeight: 600, fontFamily: theme.uiFont }}>{f.name}</span></div>}
+        <p style={{ fontSize: theme.id === "diary" ? 18 : 15, color: dk ? "rgba(255,255,255,.35)" : (theme.id === "diary" ? "rgba(90,74,58,.5)" : "rgba(0,0,0,.4)"), lineHeight: 1.45, marginTop: 6, fontFamily: theme.bodyFont }}>{excerpt(note.blocks)}</p>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10 }}>
+          <span style={{ fontSize: theme.id === "diary" ? 15 : 13, color: dk ? "rgba(255,255,255,.2)" : (theme.id === "diary" ? "rgba(90,74,58,.3)" : "rgba(0,0,0,.25)"), fontWeight: 500, fontFamily: theme.uiFont }}>{fmtDate(note.date)}</span>
+          {f && <div style={{ display: "flex", alignItems: "center", gap: 5, padding: "3px 10px 3px 8px", borderRadius: cr / 2, background: dk ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.03)" }}><div style={{ width: 7, height: 7, borderRadius: 4, background: f.color }} /><span style={{ color: f.color, fontSize: 12, fontWeight: 600, fontFamily: theme.uiFont }}>{f.name}</span></div>}
         </div>
       </div>
     </div>
@@ -591,10 +591,10 @@ function StackedCardList({ notes, pinned, unpinned, folders, activeF, dk, theme,
   }
 
   return (
-    <div ref={scrollRef} onScroll={handleScroll} style={{ flex: 1, overflowY: "auto", overflowX: "hidden", padding: "4px 24px 0", position: "relative" }}>
-      <div style={{ padding: "2px 0 4px", display: "flex", justifyContent: "space-between" }}><span style={{ fontSize: 10, color: C.muted }}>← delete</span><span style={{ fontSize: 10, color: C.muted }}>move →</span></div>
+    <div ref={scrollRef} onScroll={handleScroll} style={{ flex: 1, overflowY: "auto", overflowX: "hidden", padding: "4px 18px 0", position: "relative" }}>
+      <div style={{ padding: "2px 2px 6px", display: "flex", justifyContent: "space-between" }}><span style={{ fontSize: 11, color: C.muted }}>← delete</span><span style={{ fontSize: 11, color: C.muted }}>move →</span></div>
       {allCards.map(item => {
-        if (item.type === "label") return <p key={item.key} style={{ fontSize: 12, fontWeight: 650, textTransform: "uppercase", letterSpacing: 1.2, marginBottom: 6, color: C.muted, fontFamily: theme.uiFont }}>{item.text}</p>;
+        if (item.type === "label") return <p key={item.key} style={{ fontSize: 13, fontWeight: 650, textTransform: "uppercase", letterSpacing: 1.2, marginBottom: 8, color: C.muted, fontFamily: theme.uiFont }}>{item.text}</p>;
         return (
           <StackedCard key={item.key} note={item.note} idx={item.idx} scrollRef={scrollRef} scrollY={scrollY}
             folders={folders} activeF={activeF} dk={dk} theme={theme}
@@ -1159,8 +1159,8 @@ function NotesApp({ user, fb, isDesktop, isStandalone, onSignOut }) {
         {/* ══ LIST ══ */}
         {view === "list" && (
           <div style={{ ...s.vc, height: fullScreen ? "100%" : "calc(100% - 54px)", maxWidth: isDesktop ? 600 : "none", margin: isDesktop ? "0 auto" : 0, width: "100%" }} className="vi">
-            <div style={{ ...s.tBar, paddingTop: isStandalone && !isDesktop ? 48 : fullScreen ? 16 : 8 }}><div className="tb" style={{ ...s.tIc, color: C.text }} onClick={() => setSideOpen(true)}><Hamburger /></div><h1 style={{ ...s.tTitle, color: C.text, fontFamily: T.headFont, fontWeight: T.headWeight, letterSpacing: T.headSpacing, fontSize: T.id === "diary" ? 34 : 28 }}>{hLabel}</h1><div className="tb" style={{ ...s.tIc, color: C.text }} onClick={() => setSetOpen(true)}><Gear /></div></div>
-            {saveStatus && <div style={{ textAlign: "center", padding: "0 0 4px", transition: "opacity .3s" }}><span style={{ fontSize: 10, color: saveStatus === "saving" ? C.soft : saveStatus === "error" ? "#ff3b30" : C.check, fontWeight: 600, letterSpacing: .5 }}>{saveStatus === "saving" ? "Saving…" : saveStatus === "error" ? "⚠ " + (saveError || "Save failed") : "✓ Saved to cloud"}</span></div>}
+            <div style={{ ...s.tBar, paddingTop: isStandalone && !isDesktop ? 48 : fullScreen ? 16 : 8 }}><div className="tb" style={{ ...s.tIc, color: C.text }} onClick={() => setSideOpen(true)}><Hamburger /></div><h1 style={{ ...s.tTitle, color: C.text, fontFamily: T.headFont, fontWeight: T.headWeight, letterSpacing: T.headSpacing, fontSize: T.id === "diary" ? 36 : 32 }}>{hLabel}</h1><div className="tb" style={{ ...s.tIc, color: C.text }} onClick={() => setSetOpen(true)}><Gear /></div></div>
+            {saveStatus && <div style={{ textAlign: "center", padding: "2px 0 6px", transition: "opacity .3s" }}><span style={{ fontSize: 12, color: saveStatus === "saving" ? C.soft : saveStatus === "error" ? "#ff3b30" : C.check, fontWeight: 600, letterSpacing: .5 }}>{saveStatus === "saving" ? "Saving…" : saveStatus === "error" ? "⚠ " + (saveError || "Save failed") : "✓ Saved to cloud"}</span></div>}
             {curF && <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "0 24px 2px" }}><div style={{ width: 8, height: 8, borderRadius: 4, background: curF.color }} /><span style={{ fontSize: 13, color: curF.color, fontWeight: 600 }}>{cntFor(activeF)} note{cntFor(activeF) !== 1 ? "s" : ""}</span></div>}
             <div style={s.sW}><div style={{ ...s.sB, background: C.searchBg, borderRadius: T.searchRadius, border: T.cardStyle === "solid" ? `1px solid ${dk ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.08)"}` : "none" }} onClick={() => setSearchOn(true)}><span style={{ color: C.soft }}><SearchI /></span>{searchOn ? <input ref={searchRef} className="si" style={{ ...s.si, color: C.text, fontFamily: T.uiFont }} value={searchQ} onChange={e => setSearchQ(e.target.value)} onBlur={() => { if (!searchQ) setSearchOn(false); }} placeholder="Search" /> : <span style={{ fontSize: 16, color: C.muted, fontFamily: T.uiFont }}>Search</span>}{searchQ && <div style={s.clr} onClick={e => { e.stopPropagation(); setSearchQ(""); setSearchOn(false); }}>✕</div>}</div></div>
             <StackedCardList
@@ -1186,8 +1186,8 @@ function NotesApp({ user, fb, isDesktop, isStandalone, onSignOut }) {
         {view === "editor" && selId && (
           <div className={animIn ? "ei" : "eo"} style={{ ...s.ed, top: fullScreen ? 0 : 54, background: dk ? "#1c1c1e" : (T.cardStyle === "glass" ? (selNote ? PALETTES[selNote.color].bg : PALETTES[0].bg) : T.cardStyle === "paper" ? "#fffdf7" : T.phoneBg), maxWidth: isDesktop ? 700 : "none", margin: isDesktop ? "0 auto" : 0, left: isDesktop ? 0 : 0, right: isDesktop ? 0 : 0 }}>
             {/* Top bar */}
-            <div style={s.eBar}>
-              <div className="tb" style={{ ...s.bk, color: C.text }} onClick={closeNote}><BackI /><span style={{ fontSize: 16, fontWeight: 500 }}>Back</span></div>
+            <div style={{ ...s.eBar, paddingTop: isStandalone && !isDesktop ? 52 : 12 }}>
+              <div className="tb" style={{ ...s.bk, color: C.text }} onClick={closeNote}><BackI /><span style={{ fontSize: 17, fontWeight: 500 }}>Back</span></div>
               <div style={{ display: "flex", gap: 2 }}>
                 <div className="tb" style={{ ...s.ti, color: C.text }} onClick={() => { setShowFP(!showFP); setShowCP(false); }}><TagI /></div>
                 <div className="tb" style={{ ...s.ti, color: C.text }} onClick={() => { setShowCP(!showCP); setShowFP(false); }}><ColorI /></div>
@@ -1354,17 +1354,17 @@ const s = {
   bars: { display: "flex", alignItems: "flex-end", gap: 1.5 },
   batt: { width: 25, height: 12, borderRadius: 3.5, border: "1.5px solid", position: "relative", display: "flex", alignItems: "center", padding: 1.5 },
   vc: { height: "calc(100% - 54px)", display: "flex", flexDirection: "column", position: "relative" },
-  tBar: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 18px 2px" },
+  tBar: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 18px 4px" },
   tIc: { width: 42, height: 42, borderRadius: 14 },
-  tTitle: { fontSize: 28, fontWeight: 700, letterSpacing: -.8, fontFamily: "'Source Serif 4',Georgia,serif", textAlign: "center", flex: 1 },
-  sW: { padding: "8px 24px 2px" },
-  sB: { display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 14, cursor: "text" },
-  si: { flex: 1, border: "none", background: "transparent", fontSize: 16, fontFamily: "inherit" },
+  tTitle: { fontSize: 32, fontWeight: 700, letterSpacing: -.8, fontFamily: "'Source Serif 4',Georgia,serif", textAlign: "center", flex: 1 },
+  sW: { padding: "8px 18px 4px" },
+  sB: { display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", borderRadius: 14, cursor: "text" },
+  si: { flex: 1, border: "none", background: "transparent", fontSize: 17, fontFamily: "inherit" },
   clr: { width: 20, height: 20, borderRadius: 10, background: "rgba(120,120,120,.3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#fff", fontWeight: 700, cursor: "pointer" },
   scr: { flex: 1, overflowY: "auto", padding: "4px 24px" },
   secL: { fontSize: 12, fontWeight: 650, textTransform: "uppercase", letterSpacing: 1.2, marginBottom: 6 },
   emp: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", paddingTop: 80 },
-  fab: { position: "absolute", bottom: 32, right: 24, width: 56, height: 56, borderRadius: 28, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 6px 24px rgba(0,0,0,.2)", cursor: "pointer", zIndex: 250 },
+  fab: { position: "absolute", bottom: 32, right: 22, width: 60, height: 60, borderRadius: 30, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 6px 24px rgba(0,0,0,.2)", cursor: "pointer", zIndex: 250 },
   ov: { position: "absolute", inset: 0, zIndex: 300, borderRadius: 51 },
   side: { position: "absolute", top: 0, left: 0, bottom: 0, width: "82%", zIndex: 310, borderRadius: "51px 0 0 51px", display: "flex", flexDirection: "column", transition: "transform .35s cubic-bezier(.23,1,.32,1),background .4s", boxShadow: "4px 0 30px rgba(0,0,0,.1)" },
   sett: { position: "absolute", top: 0, right: 0, bottom: 0, width: "85%", zIndex: 310, borderRadius: "0 51px 51px 0", display: "flex", flexDirection: "column", transition: "transform .35s cubic-bezier(.23,1,.32,1),background .4s", boxShadow: "-4px 0 30px rgba(0,0,0,.1)" },
@@ -1383,15 +1383,15 @@ const s = {
   tog: { width: 48, height: 30, borderRadius: 15, padding: 3 },
   togK: { width: 24, height: 24, borderRadius: 12, background: "#fff", boxShadow: "0 1px 4px rgba(0,0,0,.15)", transition: "transform .3s cubic-bezier(.23,1,.32,1)" },
   ed: { position: "absolute", top: 54, bottom: 0, left: 0, right: 0, display: "flex", flexDirection: "column", zIndex: 50 },
-  eBar: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px 4px" },
-  bk: { display: "flex", alignItems: "center", gap: 4, padding: "8px 12px 8px 6px", borderRadius: 12, background: "transparent" },
-  ti: { width: 36, height: 36, borderRadius: 10, background: "transparent" },
+  eBar: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 14px 6px" },
+  bk: { display: "flex", alignItems: "center", gap: 4, padding: "10px 14px 10px 8px", borderRadius: 12, background: "transparent" },
+  ti: { width: 40, height: 40, borderRadius: 12, background: "transparent" },
   pkR: { display: "flex", flexWrap: "wrap", gap: 8, padding: "6px 20px 10px", justifyContent: "center" },
   ch: { padding: "6px 14px", borderRadius: 20, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center", gap: 5, border: "1.5px solid transparent" },
   cR: { display: "flex", justifyContent: "center", gap: 12, padding: "8px 24px 10px" },
   cD: { width: 32, height: 32, borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center" },
-  eC: { flex: 1, padding: "0 24px 0", overflowY: "auto", display: "flex", flexDirection: "column" },
-  eT: { fontSize: 30, fontWeight: 700, border: "none", background: "transparent", fontFamily: "'Source Serif 4',Georgia,serif", letterSpacing: -.8, lineHeight: 1.2, marginBottom: 14, width: "100%" },
+  eC: { flex: 1, padding: "0 20px 0", overflowY: "auto", display: "flex", flexDirection: "column" },
+  eT: { fontSize: 32, fontWeight: 700, border: "none", background: "transparent", fontFamily: "'Source Serif 4',Georgia,serif", letterSpacing: -.8, lineHeight: 1.2, marginBottom: 14, width: "100%" },
   /* Toolbar */
   toolbar: { display: "flex", justifyContent: "space-around", padding: "8px 8px", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", flexShrink: 0 },
   tbb: { display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "6px 8px", borderRadius: 10, minWidth: 52 },
