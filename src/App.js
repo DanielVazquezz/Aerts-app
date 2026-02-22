@@ -733,8 +733,12 @@ export default function AppWrapper() {
   const [signInLoading, setSignInLoading] = useState(false);
   const [authError, setAuthError] = useState(null);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
+    // Detect if running as standalone web app (not in Claude artifact iframe)
+    const standalone = window.self === window.top;
+    setIsStandalone(standalone);
     const check = () => setIsDesktop(window.innerWidth > 640);
     check();
     window.addEventListener("resize", check);
@@ -775,45 +779,47 @@ export default function AppWrapper() {
     if (fb?.auth) await fb.auth.signOut();
   };
 
+  // Full-screen shell (standalone or desktop)
+  const fullShell = (content) => (
+    <div style={{ width: "100vw", height: "100vh", overflow: "hidden", position: "relative" }}>
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      {content}
+    </div>
+  );
+
+  // Phone frame shell (only for Claude artifact preview)
+  const phoneShell = (content) => (
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f2f0ed", padding: "40px 20px" }}>
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      <div style={{ width: 393, height: 852, borderRadius: 55, background: "#000", padding: 4, boxShadow: "0 50px 100px rgba(0,0,0,.15)" }}>
+        <div style={{ width: "100%", height: "100%", borderRadius: 51, overflow: "hidden" }}>{content}</div>
+      </div>
+    </div>
+  );
+
+  const shell = (isStandalone || isDesktop) ? fullShell : phoneShell;
+
   // Loading screen
   if (authLoading) {
-    const spinner = (
+    return shell(
       <div style={{ width: "100%", height: "100%", background: "#faf9f7", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
         <div style={{ width: 28, height: 28, border: "3px solid rgba(0,0,0,.08)", borderTopColor: "rgba(0,0,0,.4)", borderRadius: "50%", animation: "spin .7s linear infinite" }} />
         <p style={{ fontSize: 14, color: "rgba(0,0,0,.3)", fontWeight: 500, fontFamily: "'Source Serif 4',Georgia,serif" }}>Loading…</p>
-      </div>
-    );
-    if (isDesktop) return <div style={{ width: "100vw", height: "100vh" }}><style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>{spinner}</div>;
-    return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f2f0ed", padding: "40px 20px" }}>
-        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-        <div style={{ width: 393, height: 852, borderRadius: 55, background: "#000", padding: 4, boxShadow: "0 50px 100px rgba(0,0,0,.15)" }}>
-          <div style={{ width: "100%", height: "100%", borderRadius: 51, overflow: "hidden" }}>{spinner}</div>
-        </div>
       </div>
     );
   }
 
   // Not signed in — show login
   if (!user) {
-    const loginUI = <LoginScreen onGoogleSignIn={handleGoogleSignIn} loading={signInLoading} error={authError} />;
-    if (isDesktop) return <div style={{ width: "100vw", height: "100vh" }}><style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>{loginUI}</div>;
-    return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f2f0ed", padding: "40px 20px" }}>
-        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-        <div style={{ width: 393, height: 852, borderRadius: 55, background: "#000", padding: 4, boxShadow: "0 50px 100px rgba(0,0,0,.15)" }}>
-          <div style={{ width: "100%", height: "100%", borderRadius: 51, overflow: "hidden" }}>{loginUI}</div>
-        </div>
-      </div>
-    );
+    return shell(<LoginScreen onGoogleSignIn={handleGoogleSignIn} loading={signInLoading} error={authError} />);
   }
 
   // Signed in — show app
-  return <NotesApp user={user} fb={fb} isDesktop={isDesktop} onSignOut={handleSignOut} />;
+  return <NotesApp user={user} fb={fb} isDesktop={isDesktop} isStandalone={isStandalone} onSignOut={handleSignOut} />;
 }
 
 /* ═══ MAIN APP ═══ */
-function NotesApp({ user, fb, isDesktop, onSignOut }) {
+function NotesApp({ user, fb, isDesktop, isStandalone, onSignOut }) {
   const [notes, setNotes] = useState(SAMPLE_NOTES);
   const [folders, setFolders] = useState(DEFAULT_FOLDERS);
   const [loaded, setLoaded] = useState(false);
@@ -1032,7 +1038,8 @@ function NotesApp({ user, fb, isDesktop, onSignOut }) {
   };
 
   // ── Loading screen ──
-  const R = isDesktop ? 0 : 51; // border radius for overlays
+  const fullScreen = isStandalone || isDesktop;
+  const R = fullScreen ? 0 : 51; // border radius for overlays
 
   if (!loaded) {
     const spinner = (
@@ -1041,7 +1048,7 @@ function NotesApp({ user, fb, isDesktop, onSignOut }) {
         <p style={{ fontSize: 14, color: "rgba(0,0,0,.3)", fontWeight: 500, fontFamily: "'Source Serif 4',Georgia,serif" }}>Loading your notes…</p>
       </div>
     );
-    if (isDesktop) return <div style={{ width: "100vw", height: "100vh" }}><style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>{spinner}</div>;
+    if (fullScreen) return <div style={{ width: "100vw", height: "100vh" }}><style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>{spinner}</div>;
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f2f0ed", padding: "40px 20px" }}>
         <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
@@ -1055,13 +1062,13 @@ function NotesApp({ user, fb, isDesktop, onSignOut }) {
   // ═══ App content (shared between phone & desktop) ═══
   const appContent = (
     <div style={{ width: "100%", height: "100%", borderRadius: R, overflow: "hidden", position: "relative", transition: "background .5s", background: C.phoneBg }}>
-      {/* Status bar - only on phone */}
-      {!isDesktop && <div style={s.stat}><span style={{ ...s.time, color: C.text }}>9:41</span><div style={{ ...s.icons, color: C.text }}><div style={s.bars}>{[12,10,8,6].map((h,i) => <div key={i} style={{ width: 3, height: h, borderRadius: 1, background: C.text }} />)}</div><span style={{ fontSize: 11, fontWeight: 600 }}>5G</span><div style={{ ...s.batt, borderColor: C.text }}><div style={{ width: "75%", height: "100%", borderRadius: 1.5, background: C.text }} /><div style={{ position: "absolute", right: -4, width: 2, height: 5, borderRadius: "0 1px 1px 0", background: C.text }} /></div></div></div>}
+      {/* Status bar - only in Claude artifact phone frame */}
+      {!fullScreen && <div style={s.stat}><span style={{ ...s.time, color: C.text }}>9:41</span><div style={{ ...s.icons, color: C.text }}><div style={s.bars}>{[12,10,8,6].map((h,i) => <div key={i} style={{ width: 3, height: h, borderRadius: 1, background: C.text }} />)}</div><span style={{ fontSize: 11, fontWeight: 600 }}>5G</span><div style={{ ...s.batt, borderColor: C.text }}><div style={{ width: "75%", height: "100%", borderRadius: 1.5, background: C.text }} /><div style={{ position: "absolute", right: -4, width: 2, height: 5, borderRadius: "0 1px 1px 0", background: C.text }} /></div></div></div>}
 
       {/* SIDEBAR */}
       {sideOpen && <div className="ov" style={{ ...s.ov, background: C.overlay, borderRadius: R }} onClick={() => { setSideOpen(false); setNfMode(false); }} />}
-      <div style={{ ...s.side, background: C.panelBg, transform: sideOpen ? "translateX(0)" : "translateX(-100%)", borderRadius: isDesktop ? 0 : "51px 0 0 51px", width: isDesktop ? 320 : "82%", maxWidth: isDesktop ? 320 : "none" }}>
-          <div style={{ ...s.pH, paddingTop: isDesktop ? 24 : 68 }}><h2 style={{ ...s.pT, color: C.text, fontFamily: T.headFont, fontWeight: T.headWeight, fontSize: T.id === "diary" ? 32 : 26 }}>Projects</h2><div className="tb" style={s.xB} onClick={() => { setSideOpen(false); setNfMode(false); }}><XI /></div></div>
+      <div style={{ ...s.side, background: C.panelBg, transform: sideOpen ? "translateX(0)" : "translateX(-100%)", borderRadius: fullScreen ? 0 : "51px 0 0 51px", width: isDesktop ? 320 : "85%", maxWidth: isDesktop ? 320 : "none" }}>
+          <div style={{ ...s.pH, paddingTop: isStandalone && !isDesktop ? 48 : fullScreen ? 24 : 68 }}><h2 style={{ ...s.pT, color: C.text, fontFamily: T.headFont, fontWeight: T.headWeight, fontSize: T.id === "diary" ? 32 : 26 }}>Projects</h2><div className="tb" style={s.xB} onClick={() => { setSideOpen(false); setNfMode(false); }}><XI /></div></div>
           <div style={s.pS}>
             <div className="sr" style={{ ...s.sr, background: !activeF ? C.active : "transparent" }} onClick={() => pickF(null)}><div style={s.srL}><div style={{ ...s.srD, background: dk ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.07)" }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={C.text} strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg></div><span style={{ ...s.srN, color: C.text, fontWeight: !activeF ? 650 : 500 }}>All Notes</span></div><span style={{ ...s.srC, color: C.soft }}>{notes.length}</span></div>
             {uncatCnt > 0 && <div className="sr" style={{ ...s.sr, background: activeF === "__uncat" ? C.active : "transparent" }} onClick={() => pickF("__uncat")}><div style={s.srL}><div style={{ ...s.srD, background: dk ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.05)" }}><span style={{ fontSize: 13, color: C.soft }}>○</span></div><span style={{ ...s.srN, color: C.text, fontWeight: activeF === "__uncat" ? 650 : 500 }}>Uncategorized</span></div><span style={{ ...s.srC, color: C.soft }}>{uncatCnt}</span></div>}
@@ -1073,8 +1080,8 @@ function NotesApp({ user, fb, isDesktop, onSignOut }) {
 
         {/* SETTINGS */}
         {setOpen && <div className="ov" style={{ ...s.ov, background: C.overlay, borderRadius: R }} onClick={() => setSetOpen(false)} />}
-        <div style={{ ...s.sett, background: C.panelBg, transform: setOpen ? "translateX(0)" : "translateX(100%)", borderRadius: isDesktop ? 0 : "0 51px 51px 0", width: isDesktop ? 360 : "85%", maxWidth: isDesktop ? 360 : "none" }}>
-          <div style={{ ...s.pH, paddingTop: isDesktop ? 24 : 68 }}><h2 style={{ ...s.pT, color: C.text, fontFamily: T.headFont, fontWeight: T.headWeight, fontSize: T.id === "diary" ? 32 : 26 }}>Settings</h2><div className="tb" style={s.xB} onClick={() => setSetOpen(false)}><XI /></div></div>
+        <div style={{ ...s.sett, background: C.panelBg, transform: setOpen ? "translateX(0)" : "translateX(100%)", borderRadius: fullScreen ? 0 : "0 51px 51px 0", width: isDesktop ? 360 : "88%", maxWidth: isDesktop ? 360 : "none" }}>
+          <div style={{ ...s.pH, paddingTop: isStandalone && !isDesktop ? 48 : fullScreen ? 24 : 68 }}><h2 style={{ ...s.pT, color: C.text, fontFamily: T.headFont, fontWeight: T.headWeight, fontSize: T.id === "diary" ? 32 : 26 }}>Settings</h2><div className="tb" style={s.xB} onClick={() => setSetOpen(false)}><XI /></div></div>
           <div style={s.pS}>
             <p style={{ ...s.sL, color: C.soft }}>Account</p>
             <div style={{ ...s.sC, background: dk ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.03)" }}><div style={{ display: "flex", alignItems: "center", gap: 14, padding: 16 }}><div style={{ width: 44, height: 44, borderRadius: 22, background: dk ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.06)", display: "flex", alignItems: "center", justifyContent: "center", color: C.text }}><UserI /></div><div><p style={{ fontSize: 16, fontWeight: 600, color: C.text }}>Your Name</p><p style={{ fontSize: 12, color: C.soft, marginTop: 1 }}>name@email.com</p></div></div></div>
@@ -1129,8 +1136,8 @@ function NotesApp({ user, fb, isDesktop, onSignOut }) {
 
         {/* ══ LIST ══ */}
         {view === "list" && (
-          <div style={{ ...s.vc, height: isDesktop ? "100%" : "calc(100% - 54px)", maxWidth: isDesktop ? 600 : "none", margin: isDesktop ? "0 auto" : 0, width: "100%" }} className="vi">
-            <div style={{ ...s.tBar, paddingTop: isDesktop ? 16 : 8 }}><div className="tb" style={{ ...s.tIc, color: C.text }} onClick={() => setSideOpen(true)}><Hamburger /></div><h1 style={{ ...s.tTitle, color: C.text, fontFamily: T.headFont, fontWeight: T.headWeight, letterSpacing: T.headSpacing, fontSize: T.id === "diary" ? 34 : 28 }}>{hLabel}</h1><div className="tb" style={{ ...s.tIc, color: C.text }} onClick={() => setSetOpen(true)}><Gear /></div></div>
+          <div style={{ ...s.vc, height: fullScreen ? "100%" : "calc(100% - 54px)", maxWidth: isDesktop ? 600 : "none", margin: isDesktop ? "0 auto" : 0, width: "100%" }} className="vi">
+            <div style={{ ...s.tBar, paddingTop: isStandalone && !isDesktop ? 48 : fullScreen ? 16 : 8 }}><div className="tb" style={{ ...s.tIc, color: C.text }} onClick={() => setSideOpen(true)}><Hamburger /></div><h1 style={{ ...s.tTitle, color: C.text, fontFamily: T.headFont, fontWeight: T.headWeight, letterSpacing: T.headSpacing, fontSize: T.id === "diary" ? 34 : 28 }}>{hLabel}</h1><div className="tb" style={{ ...s.tIc, color: C.text }} onClick={() => setSetOpen(true)}><Gear /></div></div>
             {saveStatus && <div style={{ textAlign: "center", padding: "0 0 4px", transition: "opacity .3s" }}><span style={{ fontSize: 10, color: saveStatus === "saving" ? C.soft : saveStatus === "error" ? "#ff3b30" : C.check, fontWeight: 600, letterSpacing: .5 }}>{saveStatus === "saving" ? "Saving…" : saveStatus === "error" ? "⚠ " + (saveError || "Save failed") : "✓ Saved to cloud"}</span></div>}
             {curF && <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "0 24px 2px" }}><div style={{ width: 8, height: 8, borderRadius: 4, background: curF.color }} /><span style={{ fontSize: 13, color: curF.color, fontWeight: 600 }}>{cntFor(activeF)} note{cntFor(activeF) !== 1 ? "s" : ""}</span></div>}
             <div style={s.sW}><div style={{ ...s.sB, background: C.searchBg, borderRadius: T.searchRadius, border: T.cardStyle === "solid" ? `1px solid ${dk ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.08)"}` : "none" }} onClick={() => setSearchOn(true)}><span style={{ color: C.soft }}><SearchI /></span>{searchOn ? <input ref={searchRef} className="si" style={{ ...s.si, color: C.text, fontFamily: T.uiFont }} value={searchQ} onChange={e => setSearchQ(e.target.value)} onBlur={() => { if (!searchQ) setSearchOn(false); }} placeholder="Search" /> : <span style={{ fontSize: 16, color: C.muted, fontFamily: T.uiFont }}>Search</span>}{searchQ && <div style={s.clr} onClick={e => { e.stopPropagation(); setSearchQ(""); setSearchOn(false); }}>✕</div>}</div></div>
@@ -1155,7 +1162,7 @@ function NotesApp({ user, fb, isDesktop, onSignOut }) {
 
         {/* ══ EDITOR ══ */}
         {view === "editor" && selId && (
-          <div className={animIn ? "ei" : "eo"} style={{ ...s.ed, top: isDesktop ? 0 : 54, background: dk ? "#1c1c1e" : (T.cardStyle === "glass" ? (selNote ? PALETTES[selNote.color].bg : PALETTES[0].bg) : T.cardStyle === "paper" ? "#fffdf7" : T.phoneBg), maxWidth: isDesktop ? 700 : "none", margin: isDesktop ? "0 auto" : 0, left: isDesktop ? 0 : 0, right: isDesktop ? 0 : 0 }}>
+          <div className={animIn ? "ei" : "eo"} style={{ ...s.ed, top: fullScreen ? 0 : 54, background: dk ? "#1c1c1e" : (T.cardStyle === "glass" ? (selNote ? PALETTES[selNote.color].bg : PALETTES[0].bg) : T.cardStyle === "paper" ? "#fffdf7" : T.phoneBg), maxWidth: isDesktop ? 700 : "none", margin: isDesktop ? "0 auto" : 0, left: isDesktop ? 0 : 0, right: isDesktop ? 0 : 0 }}>
             {/* Top bar */}
             <div style={s.eBar}>
               <div className="tb" style={{ ...s.bk, color: C.text }} onClick={closeNote}><BackI /><span style={{ fontSize: 16, fontWeight: 500 }}>Back</span></div>
@@ -1249,12 +1256,12 @@ function NotesApp({ user, fb, isDesktop, onSignOut }) {
         </>}
 
         {/* FILE PREVIEW */}
-        {previewFile && <FilePreviewModal block={previewFile} dk={dk} onClose={() => setPreviewFile(null)} borderR={R} isDesktop={isDesktop} />}
+        {previewFile && <FilePreviewModal block={previewFile} dk={dk} onClose={() => setPreviewFile(null)} borderR={R} isDesktop={fullScreen} />}
 
       </div>
   );
 
-  if (isDesktop) {
+  if (fullScreen) {
     return (
       <div style={{ width: "100vw", height: "100vh", overflow: "hidden", fontFamily: T.uiFont, position: "relative" }}>
         <style>{buildCSS(dk, theme)}</style>
@@ -1285,6 +1292,8 @@ const buildCSS = (dk, theme) => `
 .paper-lines{background-image:repeating-linear-gradient(transparent,transparent 31px,rgba(160,140,110,.13) 31px,rgba(160,140,110,.13) 32px);background-position:0 0}
 .paper-margin{border-left:2px solid rgba(220,100,100,.12);margin-left:0;padding-left:14px}
 *{box-sizing:border-box;margin:0;padding:0}::-webkit-scrollbar{width:0;height:0}
+html,body,#root{height:100%;width:100%;overflow:hidden;position:fixed;top:0;left:0}
+body{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent;touch-action:manipulation;overscroll-behavior:none}
 @keyframes fu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 @keyframes si{from{opacity:0;transform:translateX(50px)}to{opacity:1;transform:translateX(0)}}
 @keyframes so{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(50px)}}
